@@ -1,5 +1,8 @@
 <#import "../layout/defaultLayout.ftl.html" as layout> 
 <@layout.myLayout "Home page">
-    <h1>${i18n("hello.world")}</h1>
-    <h2>Super Secret - Only for logged in users ;)</h2>
+    <div class="container">
+        <h1>${i18n("hello.world")}</h1>
+        <h2>Super Secret - Only for logged in users ;)</h2>
+        <a href="/game" class="btn btn-success">Game</a>
+    </div>
 </@layout.myLayout>
