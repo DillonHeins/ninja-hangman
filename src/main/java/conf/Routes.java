@@ -41,6 +41,7 @@ public class Routes implements ApplicationRoutes {
 
         // Game
         router.GET().route("/game").with(GameController.class, "index");
+        router.POST().route("/game").with(GameController.class, "indexPost");
 
         ///////////////////////////////////////////////////////////////////////
         // Assets (pictures / javascript)

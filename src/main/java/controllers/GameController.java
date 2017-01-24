@@ -8,6 +8,7 @@ import ninja.Context;
 import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
+import ninja.params.Param;
 import services.GameService;
 
 /**
@@ -22,14 +23,26 @@ public class GameController {
 
     @FilterWith(AuthenticationFilter.class)
     public Result index(Context context) {
-        Result result = Results.html();
-
         Long id = gameService.newGame(context.getSession());
-
         Game game = gameDao.getGameById(id);
 
+        Result result = Results.html();
         result.render("length", game.getWord().length());
 
         return result;
+    }
+
+    public Result indexPost(@Param("letter") String letter,
+                            @Param("id") Long id) {
+        Long num = 2L;
+
+        System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<" + letter + " " + id);
+
+        Game game = gameDao.getGameById(num);
+        game.setGuesses(game.getGuesses() + letter);
+
+        //update game here
+
+        return Results.json().render(game);
     }
 }

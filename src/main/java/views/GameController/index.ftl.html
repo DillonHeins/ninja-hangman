@@ -6,27 +6,48 @@
         <img src="/assets/images/1.jpg">
 
         <button class="btn btn-success" id="getImage">Get Second Image</button>
+        <button class="btn btn-success" id="ajax">Submit letter</button>
 
         <div id="something">
 
         </div>
+
+
     </div>
 
     <script>
         function getImage() {
             var img = $("<img>").attr('src', '/assets/images/2.jpg')
-                .on('load', function () {
-                    if (!this.complete || typeof this.naturalWidth == "undefined" || this.naturalWidth == 0) {
-                        alert('broken image!');
-                    } else {
-                        $("#something").append(img);
-                    }
-                });
+            .on('load', function () {
+                if (!this.complete || typeof this.naturalWidth == "undefined" || this.naturalWidth == 0) {
+                    alert('broken image!');
+                } else {
+                    $("#something").append(img);
+                }
+            });
         }
 
         window.onload = function () {
             $("#getImage").on("click", function () {
                getImage();
+            });
+
+            $("#ajax").on("click", function () {
+               $.ajax({
+                 url: "/game",
+                 method: "POST",
+                 data: {
+                     letter: "a",
+                     id: 1
+                 },
+                 dataType: 'json',
+                 success: function (data) {
+                     console.log(data);
+                 },
+                 fail: function (data) {
+                     console.log(data);
+                 }
+               });
             });
         }
     </script>
