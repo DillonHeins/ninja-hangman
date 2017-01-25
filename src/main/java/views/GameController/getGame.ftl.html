@@ -7,7 +7,7 @@
                 <img id="img" src="/assets/images/1.jpg" style="width: 100%;">
             </div>
             <div class="col-md-6" style="padding: 2em;">
-                <div class="input-group">
+                <div class="input-group" id="submitLetters">
                     <input type="text" class="form-control" id="guess">
                     <span class="input-group-btn">
                         <button class="btn btn-success" type="button" id="ajax">
@@ -24,29 +24,79 @@
         </div>
         <input type="hidden" id="gameId" value="${id}">
         <input type="hidden" id="length" value="${length}">
+
+        <h3>${id}</h3>
+        <h3>${length}</h3>
+        <input type="text" id="dbWord" value="${word}">
+        <input type="text" id="dbGuesses" value="${guesses}">
     </div>
 
     <script>
         window.onload = function () {
-            var word = "";
-            var wordLength = parseInt($("#length").val(), 10);
-            for (var i = 0; i < wordLength; ++i) {
-                word += "_";
+            var wordLength;
+            var word;
+            var wordSelector;
+
+            wordLength = parseInt($("#length").val(), 10);
+            wordSelector = $("#word");
+
+            if ($("#dbGuesses").val().length > 0) {
+                // set up guessed letters
+                var dbWord = $("#dbWord").val();
+                tempWord = "";
+
+                var dbGuesses = $("#dbGuesses").val();
+                for (var i = 0; i < dbWord.length; ++i) {
+                    if (dbGuesses.indexOf(dbWord.charAt(i)) >= 0) {
+                        tempWord += dbWord.charAt(i);
+                    } else {
+                        tempWord += "_";
+                    }
+                }
+
+                word = tempWord;
+                space();
+
+                // set up guesses left
+                var step = 0;
+                for (var j = 0; j < dbGuesses.length; ++j) {
+                    if (dbWord.includes(dbGuesses.charAt(j))) {
+                        ++step;
+                    }
+                }
+
+                var guessesLeft = 7 - (dbGuesses.length - step);
+
+                $("#guessCount").html(guessesLeft);
+                getImage((dbGuesses.length - step) + 1);
+
+                $("#guesses").html($("#dbGuesses").val());
+            } else {
+                word = "_".repeat(wordLength);
+                space();
             }
 
-            for (var k = 0; k < wordLength; ++k) {
-                $("#word").html($("#word").html() + word.charAt(k) + " ");
+            function space() {
+                wordSelector.html('');
+                wordSelector.html(word.split('').join(' '));
+            }
+
+            function endGame() {
+                $("#submitLetters").html(
+                    "<a href='/game' class='btn btn-success'>New Game</a>  " +
+                    "<a href='/' class='btn btn-success'>Home Page</a> "
+                );
             }
 
             function getImage(step) {
                 var img = $("<img id='img' style='width: 100%;'>").attr('src', '/assets/images/' + step + '.jpg')
-                .on('load', function () {
-                    if (!this.complete || typeof this.naturalWidth == "undefined" || this.naturalWidth == 0) {
-                        alert('Error whilst loading image.');
-                    } else {
-                        $("#img").replaceWith(img);
-                    }
-                });
+                    .on('load', function () {
+                        if (!this.complete || typeof this.naturalWidth == "undefined" || this.naturalWidth == 0) {
+                            alert('Error whilst loading image.');
+                        } else {
+                            $("#img").replaceWith(img);
+                        }
+                    });
             }
 
             $("#ajax").on("click", function () {
@@ -62,12 +112,9 @@
                     success: function (data) {
                         $("#guesses").html(data.guesses);
 
-                        if (data.word.includes(guess.val())) {
+                        if (data.word.includes(guess.val().charAt(0))) {
                             tempWord = "";
                             for (var i = 0; i < data.word.length; ++i) {
-                                console.log("word at i: " + word.charAt(i));
-                                console.log("guess val:" + guess.val());
-
                                 if (data.word.charAt(i) != guess.val().charAt(0)) {
                                     tempWord += word.charAt(i);
                                 } else {
@@ -76,10 +123,11 @@
                             }
 
                             word = tempWord;
-                            $("#word").html("");
+                            space();
 
-                            for (var k = 0; k < wordLength; ++k) {
-                                $("#word").html($("#word").html() + word.charAt(k) + " ");
+                            if (word === data.word) {
+                                alert(":) You win, yay!");
+                                endGame();
                             }
                         } else {
                             var step = 0;
@@ -89,8 +137,15 @@
                                 }
                             }
 
-                            $("#guessCount").html(7 - (data.guesses.length - step));
+                            var guessesLeft = 7 - (data.guesses.length - step);
+
+                            $("#guessCount").html(guessesLeft);
                             getImage((data.guesses.length - step) + 1);
+
+                            if (guessesLeft == 0) {
+                                alert(":( Oh no, you lost!")
+                                endGame();
+                            }
                         }
 
                         guess.val("");
