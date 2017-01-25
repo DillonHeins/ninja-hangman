@@ -2,52 +2,94 @@
     <@layout.myLayout "Game page">
     <div class="container">
         <h1>Game</h1>
-        <h2>Word length: ${length}</h2>
-        <img src="/assets/images/1.jpg">
-
-        <button class="btn btn-success" id="getImage">Get Second Image</button>
-        <button class="btn btn-success" id="ajax">Submit letter</button>
-
-        <div id="something">
-
+        <div class="row">
+            <div class="col-md-6">
+                <img id="img" src="/assets/images/1.jpg" style="width: 100%;">
+            </div>
+            <div class="col-md-6" style="padding: 2em;">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="guess">
+                    <span class="input-group-btn">
+                        <button class="btn btn-success" type="button" id="ajax">
+                            Submit Letter!
+                        </button>
+                    </span>
+                </div>
+                <div>
+                    <h2>Word: <span id="word"></span></h2>
+                    <h3>Guesses left: <span id="guessCount">7</span></h3>
+                    <h3>Guesses: <span id="guesses"></span></h3>
+                </div>
+            </div>
         </div>
-
-
+        <input type="hidden" id="gameId" value="${id}">
+        <input type="hidden" id="length" value="${length}">
     </div>
 
     <script>
-        function getImage() {
-            var img = $("<img>").attr('src', '/assets/images/2.jpg')
-            .on('load', function () {
-                if (!this.complete || typeof this.naturalWidth == "undefined" || this.naturalWidth == 0) {
-                    alert('broken image!');
-                } else {
-                    $("#something").append(img);
-                }
-            });
-        }
-
         window.onload = function () {
-            $("#getImage").on("click", function () {
-               getImage();
-            });
+            var word = "";
+            for (var i = 0; i < parseInt($("#length").val(), 10); ++i) {
+                word += "_ ";
+            }
+            $("#word").html(word);
+
+            function getImage(step) {
+                var img = $("<img id='img' style='width: 100%;'>").attr('src', '/assets/images/' + step + '.jpg')
+                .on('load', function () {
+                    if (!this.complete || typeof this.naturalWidth == "undefined" || this.naturalWidth == 0) {
+                        alert('Error whilst loading image.');
+                    } else {
+                        $("#img").replaceWith(img);
+                    }
+                });
+            }
 
             $("#ajax").on("click", function () {
-               $.ajax({
-                 url: "/game",
-                 method: "POST",
-                 data: {
-                     letter: "a",
-                     id: 1
-                 },
-                 dataType: 'json',
-                 success: function (data) {
-                     console.log(data);
-                 },
-                 fail: function (data) {
-                     console.log(data);
-                 }
-               });
+                var guess = $("#guess");
+                $.ajax({
+                    url: "/game",
+                    method: "POST",
+                    data: {
+                        letter: guess.val().charAt(0),
+                        id: parseInt($("#gameId").val(), 10)
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        $("#guesses").html(data.guesses);
+
+                        if (data.word.includes(guess.val())) {
+                            word = "";
+                            for (var i = 0; i < data.word.length; ++i) {
+                                console.log("word at i: " + word.charAt(i));
+                                console.log("guess val:" + guess.val());
+
+                                if (data.word.charAt(i) != guess.val().charAt(0)) {
+                                    word += "_ ";
+                                } else {
+                                    word += guess.val().charAt(0);
+                                }
+                            }
+
+                            $("#word").html(word);
+                        } else {
+                            var step = 0;
+                            for (var j = 0; j < data.guesses.length; ++j) {
+                                if (data.word.includes(data.guesses.charAt(j))) {
+                                    ++step;
+                                }
+                            }
+
+                            $("#guessCount").html(7 - (data.guesses.length - step));
+                            getImage((data.guesses.length - step) + 1);
+                        }
+
+                        guess.val("");
+                    },
+                    fail: function (data) {
+                        console.log(data);
+                    }
+                });
             });
         }
     </script>

@@ -28,20 +28,17 @@ public class GameController {
 
         Result result = Results.html();
         result.render("length", game.getWord().length());
+        result.render("id", game.getId());
 
         return result;
     }
 
     public Result indexPost(@Param("letter") String letter,
                             @Param("id") Long id) {
-        Long num = 2L;
-
-        System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<" + letter + " " + id);
-
-        Game game = gameDao.getGameById(num);
+        Game game = gameDao.getGameById(id);
         game.setGuesses(game.getGuesses() + letter);
 
-        //update game here
+        gameDao.updateByGameId(id, game);
 
         return Results.json().render(game);
     }

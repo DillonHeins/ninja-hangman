@@ -26,6 +26,16 @@ public class GameDao {
     }
 
     @Transactional
+    public void updateByGameId(Long id, Game updatedGame) {
+        EntityManager entityManager = entityManagerProvider.get();
+
+        Query q = entityManager.createQuery("SELECT x FROM Game x WHERE x.id = :idParam");
+        Game game = (Game) q.setParameter("idParam", id).getSingleResult();
+
+        game.setGuesses(updatedGame.getGuesses());
+    }
+
+    @Transactional
     public Long createGame(Game game) {
         if (game != null && game.getWord() != null && game.getGuesses() != null) {
             EntityManager entityManager = entityManagerProvider.get();
