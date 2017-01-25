@@ -29,10 +29,14 @@
     <script>
         window.onload = function () {
             var word = "";
-            for (var i = 0; i < parseInt($("#length").val(), 10); ++i) {
-                word += "_ ";
+            var wordLength = parseInt($("#length").val(), 10);
+            for (var i = 0; i < wordLength; ++i) {
+                word += "_";
             }
-            $("#word").html(word);
+
+            for (var k = 0; k < wordLength; ++k) {
+                $("#word").html($("#word").html() + word.charAt(k) + " ");
+            }
 
             function getImage(step) {
                 var img = $("<img id='img' style='width: 100%;'>").attr('src', '/assets/images/' + step + '.jpg')
@@ -59,19 +63,24 @@
                         $("#guesses").html(data.guesses);
 
                         if (data.word.includes(guess.val())) {
-                            word = "";
+                            tempWord = "";
                             for (var i = 0; i < data.word.length; ++i) {
                                 console.log("word at i: " + word.charAt(i));
                                 console.log("guess val:" + guess.val());
 
                                 if (data.word.charAt(i) != guess.val().charAt(0)) {
-                                    word += "_ ";
+                                    tempWord += word.charAt(i);
                                 } else {
-                                    word += guess.val().charAt(0);
+                                    tempWord += guess.val().charAt(0);
                                 }
                             }
 
-                            $("#word").html(word);
+                            word = tempWord;
+                            $("#word").html("");
+
+                            for (var k = 0; k < wordLength; ++k) {
+                                $("#word").html($("#word").html() + word.charAt(k) + " ");
+                            }
                         } else {
                             var step = 0;
                             for (var j = 0; j < data.guesses.length; ++j) {
