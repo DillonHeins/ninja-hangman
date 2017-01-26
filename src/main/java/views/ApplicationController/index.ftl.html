@@ -3,6 +3,23 @@
     <div class="container">
         <h1>${i18n("hello.world")}</h1>
         <h2>Super Secret - Only for logged in users ;)</h2>
-        <a href="/game" class="btn btn-success">Game</a>
+
+        <div id="games">
+
+        </div>
+
+        <input type="hidden" value="${ids}" id="ids">
     </div>
+
+    <script>
+        window.onload = function() {
+            var ids = $("#ids").val();
+            ids = ids.replace(/ /g,'');
+            ids = ids.substr(1, ids.length - 2).split(',');
+
+            ids.forEach(function (element) {
+                $("#games").append("<a href='/game/" + element + "'>Game number: " + element + "</a><br>");
+            });
+        }
+    </script>
 </@layout.myLayout>

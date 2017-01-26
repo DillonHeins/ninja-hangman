@@ -24,28 +24,22 @@
         </div>
         <input type="hidden" id="gameId" value="${id}">
         <input type="hidden" id="length" value="${length}">
-
-        <h3>${id}</h3>
-        <h3>${length}</h3>
-        <input type="text" id="dbWord" value="${word}">
-        <input type="text" id="dbGuesses" value="${guesses}">
+        <input type="hidden" id="dbWord" value="${word}">
+        <input type="hidden" id="dbGuesses" value="${guesses}">
     </div>
 
     <script>
         window.onload = function () {
-            var wordLength;
+            var wordLength = parseInt($("#length").val(), 10);;
             var word;
-            var wordSelector;
+            var wordSelector = $("#word");
+            var dbGuesses = $("#dbGuesses").val();
+            var dbWord = $("#dbWord").val();
 
-            wordLength = parseInt($("#length").val(), 10);
-            wordSelector = $("#word");
-
-            if ($("#dbGuesses").val().length > 0) {
+            if (dbGuesses.length > 0) {
                 // set up guessed letters
-                var dbWord = $("#dbWord").val();
                 tempWord = "";
 
-                var dbGuesses = $("#dbGuesses").val();
                 for (var i = 0; i < dbWord.length; ++i) {
                     if (dbGuesses.indexOf(dbWord.charAt(i)) >= 0) {
                         tempWord += dbWord.charAt(i);
@@ -70,7 +64,13 @@
                 $("#guessCount").html(guessesLeft);
                 getImage((dbGuesses.length - step) + 1);
 
-                $("#guesses").html($("#dbGuesses").val());
+                // set up guesses
+                $("#guesses").html(dbGuesses);
+
+                // if game over
+                if (guessesLeft == 0 || dbWord == word) {
+                    endGame();
+                }
             } else {
                 word = "_".repeat(wordLength);
                 space();
@@ -90,13 +90,13 @@
 
             function getImage(step) {
                 var img = $("<img id='img' style='width: 100%;'>").attr('src', '/assets/images/' + step + '.jpg')
-                    .on('load', function () {
-                        if (!this.complete || typeof this.naturalWidth == "undefined" || this.naturalWidth == 0) {
-                            alert('Error whilst loading image.');
-                        } else {
-                            $("#img").replaceWith(img);
-                        }
-                    });
+                .on('load', function () {
+                    if (!this.complete || typeof this.naturalWidth == "undefined" || this.naturalWidth == 0) {
+                        alert('Error whilst loading image.');
+                    } else {
+                        $("#img").replaceWith(img);
+                    }
+                });
             }
 
             $("#ajax").on("click", function () {
@@ -105,20 +105,20 @@
                     url: "/game",
                     method: "POST",
                     data: {
-                        letter: guess.val().charAt(0),
+                        letter: guess.val().toLowerCase().charAt(0),
                         id: parseInt($("#gameId").val(), 10)
                     },
                     dataType: 'json',
                     success: function (data) {
                         $("#guesses").html(data.guesses);
 
-                        if (data.word.includes(guess.val().charAt(0))) {
+                        if (data.word.includes(guess.val().toLowerCase().charAt(0))) {
                             tempWord = "";
                             for (var i = 0; i < data.word.length; ++i) {
-                                if (data.word.charAt(i) != guess.val().charAt(0)) {
+                                if (data.word.charAt(i) != guess.val().toLowerCase().charAt(0)) {
                                     tempWord += word.charAt(i);
                                 } else {
-                                    tempWord += guess.val().charAt(0);
+                                    tempWord += guess.val().toLowerCase().charAt(0);
                                 }
                             }
 

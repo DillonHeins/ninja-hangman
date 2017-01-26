@@ -2,6 +2,7 @@ package dao;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.google.inject.persist.Transactional;
 import models.HangmanUser;
 import ninja.jpa.UnitOfWork;
@@ -15,6 +16,7 @@ import java.util.List;
  * Created by dillon on 2017/01/22.
  * HangmanUserDao
  */
+@Singleton
 public class HangmanUserDao {
     @Inject
     private Provider<EntityManager> entityManagerProvider;

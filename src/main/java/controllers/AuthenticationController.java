@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import ninja.Context;
 import ninja.Result;
 import ninja.Results;
@@ -8,10 +9,13 @@ import ninja.params.Param;
 import ninja.session.Session;
 import services.AuthenticationService;
 
+import javax.persistence.NoResultException;
+
 /**
  * Created by dillon on 2017/01/22.
  * AuthenticationController
  */
+@Singleton
 public class AuthenticationController {
     @Inject
     AuthenticationService authenticationService;
@@ -43,16 +47,16 @@ public class AuthenticationController {
     public Result loginPost(@Param("username") String username,
                             @Param("password") String password,
                             Context context) {
-        boolean login = authenticationService.login(username, password);
+        try {
+            authenticationService.login(username, password);
 
-        if (login) {
             Session session = context.getSession();
             session.put("username", username);
 
             context.getFlashScope().success("login.loginSuccessful");
 
             return Results.redirect("/");
-        } else {
+        } catch (NoResultException noResultException) {
             context.getFlashScope().put("username", username);
             context.getFlashScope().error("login.errorLogin");
 
