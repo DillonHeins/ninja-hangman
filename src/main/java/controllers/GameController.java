@@ -33,6 +33,7 @@ public class GameController {
         return Results.redirect("/game/" + id);
     }
 
+    @FilterWith(AuthenticationFilter.class)
     public Result indexPost(@Param("letter") String letter,
                             @Param("id") Long id) {
         Game game = gameDao.getGameById(id);
@@ -43,6 +44,7 @@ public class GameController {
         return Results.json().render(game);
     }
 
+    @FilterWith(AuthenticationFilter.class)
     public Result getGame(@PathParam("id") String id,
                           Context context) {
         Long lId = Long.parseLong(id);
